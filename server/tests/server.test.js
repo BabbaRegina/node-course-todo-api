@@ -8,7 +8,9 @@ const { Todo } = require('./../models/todo');
 const todos = [
     {
         _id: new ObjectID(),
-        text: 'Fist test todo'
+        text: 'Fist test todo',
+        completed: true,
+        competedAt: 333
     },
     {
         _id: new ObjectID(),
@@ -140,6 +142,72 @@ describe('DELETE /todos/:id', (done) => {
         var newId = '123123123';
         request(app)
             .delete(`/todos/${newId}`) 
+            .expect(404)
+            .end(done);
+    });
+});
+
+describe('PATCH /todos/:id', (done) => {
+    it('should update todo by id', (done) => {
+        var text = 'TEST update';
+        request(app)
+            .patch(`/todos/${todos[0]._id.toHexString()}`)
+            .send({
+                "completed" : false,
+                "text": text
+            })
+            .expect(200)
+            .expect((res) => {
+                expect(res.body.todo.competedAt).toNotExist();
+                expect(res.body.todo.completed).toBe(false);
+            }).end((err,resp) =>{
+                if(err){
+                    return done(err);
+                }
+                Todo.find({ text }).then((todos) => {
+                    expect(todos.length).toBe(1);
+                    expect(todos[0].text).toBe(text);
+                    done();
+                }).catch((e) => done(e));
+            });
+    });
+
+    it('should update todo by id in true', (done) => {
+        var text = 'TEST update in TRUE';
+        request(app)
+            .patch(`/todos/${todos[1]._id.toHexString()}`)
+            .send({
+                "completed" : true,
+                "text": text
+            })
+            .expect(200)
+            .expect((res) => {
+                expect(res.body.todo.competedAt).toBeA("number");
+                expect(res.body.todo.completed).toBe(true);
+            }).end((err,resp) =>{
+                if(err){
+                    return done(err);
+                }
+                Todo.find({ text }).then((todos) => {
+                    expect(todos.length).toBe(1);
+                    expect(todos[0].text).toBe(text);
+                    done();
+                }).catch((e) => done(e));
+            });
+    });
+
+    it('should return a 404 if id not found', (done) => {
+        var newId = new ObjectID();
+        request(app)
+            .patch(`/todos/${newId.toHexString()}`)
+            .expect(404)
+            .end(done);
+    });
+
+    it('should return a 404 if id is not valid', (done) => {
+        var newId = '123123123';
+        request(app)
+            .patch(`/todos/${newId}`) 
             .expect(404)
             .end(done);
     });
