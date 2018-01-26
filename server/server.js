@@ -54,7 +54,7 @@ app.get('/todos', (req, res) => {
         });
     }, (err) => {
         res.status(400).send(err);
-    })
+    });
 });
 
 // GET todos with input
