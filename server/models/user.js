@@ -41,13 +41,31 @@ UserSchema.methods.toJSON = function () {
 
 // uso function non => perchè mi server this.
 UserSchema.methods.generateAuthToken = function () {
-    var user = this;
+    var user = this; //instance
     var access = 'auth';
     var token = jwt.sign({ _id: user._id.toHexString(), access }, 'abc123').toString();
 
     user.tokens.push({ access, token });
     return user.save().then(() => {
         return token;
+    });
+};
+
+// statics vs methods = model method vs instance method
+UserSchema.statics.findByToken = function (token) {
+    var User = this; //model
+    var decoded;
+    try {
+        decoded = jwt.verify(token, 'abc123');
+    } catch (error) {
+        return Promise.reject();
+        
+    }
+   
+    return User.findOne({
+        _id: decoded._id,
+        'tokens.token': token,
+        'tokens.access': 'auth'
     });
 };
 
