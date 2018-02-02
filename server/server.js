@@ -103,10 +103,10 @@ app.patch('/todos/:id', (req, res) => {
 
 
     if (_.isBoolean(body.completed) && body.completed) {
-        body.competedAt = new Date().getTime();
+        body.completedAt = new Date().getTime();
     } else {
         body.completed = false;
-        body.competedAt = null;
+        body.completedAt = null;
     }
     Todo.findByIdAndUpdate(id,
         { $set: body },

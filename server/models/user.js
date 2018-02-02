@@ -45,7 +45,8 @@ UserSchema.methods.generateAuthToken = function () {
   var access = 'auth';
   var token = jwt.sign({_id: user._id.toHexString(), access}, 'abc123').toString();
 
-  user.tokens.push({access, token});
+  // user.tokens.push({access, token}); non funziona con Mongo 3.6+
+  user.tokens = user.tokens.concat([{access, token}]); 
 
   return user.save().then(() => {
     return token;
